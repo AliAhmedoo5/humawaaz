@@ -16,6 +16,7 @@ interface Complaint {
   created_at: string;
   photo_url: string | null;
   lat: number | null;
+  lng: number | null;
   address: string | null;
   is_urgent: boolean;
   resolution_photo_url: string | null;

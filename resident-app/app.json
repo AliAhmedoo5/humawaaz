@@ -46,6 +46,7 @@
           "photosPermission": "Allow HumAwaaz to access your photos to attach evidence."
         }
       ],
+      "expo-document-picker",
       [
         "react-native-maps",
         {
