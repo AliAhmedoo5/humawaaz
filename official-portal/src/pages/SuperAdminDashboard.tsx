@@ -134,7 +134,7 @@ export default function SuperAdminDashboard() {
     const password = `Humawaaz2026_${safeName.substring(0,4)}!`
     setNewCredentials({ email, password, ucName: uc.name })
     setCopied(false)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    document.querySelector('main')?.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   function handleCopy() {
