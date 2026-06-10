@@ -15,7 +15,12 @@
         "foregroundImage": "./assets/icon.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.aliahmed112233.humawaaz"
+      "package": "com.aliahmed112233.humawaaz",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyAqQZ0kGnEHizqktHT1CNw7JIdMRuefuFI"
+        }
+      }
     },
     "web": {
       "favicon": "./assets/icon.png"
@@ -46,13 +51,7 @@
           "photosPermission": "Allow HumAwaaz to access your photos to attach evidence."
         }
       ],
-      "expo-document-picker",
-      [
-        "react-native-maps",
-        {
-          "androidApiKey": "AIzaSyAqQZ0kGnEHizqktHT1CNw7JIdMRuefuFI"
-        }
-      ]
+      "expo-document-picker"
     ],
     "extra": {
       "eas": {
