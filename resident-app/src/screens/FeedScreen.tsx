@@ -3,7 +3,7 @@ import { View, Text, FlatList, ActivityIndicator, TouchableOpacity, Image, Modal
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { timeAgo } from '../utils/timeAgo';
-import { MapPin, Search, Filter, AlertTriangle, Plus, Flame, ThumbsUp, ClipboardCheck, X, ImageIcon, Clock, CheckCircle, Activity, Check, Users, ExternalLink } from 'lucide-react-native';
+import { MapPin, Search, Filter, AlertTriangle, Plus, Flame, ThumbsUp, ClipboardCheck, X, ImageIcon, Clock, CheckCircle, CheckCircle2, Activity, Check, Users, ExternalLink } from 'lucide-react-native';
 import MapView, { Marker } from 'react-native-maps';
 
 interface Complaint {
