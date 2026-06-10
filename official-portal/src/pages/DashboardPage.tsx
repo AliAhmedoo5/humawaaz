@@ -26,6 +26,7 @@ import {
 } from 'recharts'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
+import SuperAdminDashboard from './SuperAdminDashboard'
 
 /* ────────────────────────────────────────────
    Types
@@ -194,6 +195,10 @@ const DEPT_COLORS = [
 
 export default function DashboardPage() {
   const { profile } = useAuth()
+
+  if (profile?.role === 'admin') {
+    return <SuperAdminDashboard />
+  }
 
   const [loading, setLoading] = useState(true)
   const [ucName, setUcName] = useState<string>('')

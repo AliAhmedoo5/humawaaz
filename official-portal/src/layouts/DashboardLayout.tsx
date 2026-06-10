@@ -22,6 +22,11 @@ export default function DashboardLayout() {
   const { profile, signOut } = useAuth()
   const navigate = useNavigate()
 
+  const adminNavItems = [
+    { to: '/', icon: LayoutDashboard, label: 'Super Admin Overview' },
+  ]
+  const currentNavItems = profile?.role === 'admin' ? adminNavItems : navItems;
+
   async function handleSignOut() {
     await signOut()
     navigate('/login')
@@ -50,7 +55,7 @@ export default function DashboardLayout() {
 
         {/* Nav Links */}
         <nav className="flex-1 px-3 py-4 space-y-1">
-          {navItems.map((item) => (
+          {currentNavItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
