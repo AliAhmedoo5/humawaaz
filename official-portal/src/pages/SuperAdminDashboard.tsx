@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
-import { ShieldAlert, Users, Map, Plus, Key } from 'lucide-react'
+import { ShieldAlert, Users, Map, Plus, Key, Copy, CheckCircle, Eye } from 'lucide-react'
 
 interface UC {
   id: string;
@@ -28,7 +28,8 @@ export default function SuperAdminDashboard() {
   const [stats, setStats] = useState<UCStats[]>([])
   const [loading, setLoading] = useState(true)
   const [generatingFor, setGeneratingFor] = useState<string | null>(null)
-  const [newCredentials, setNewCredentials] = useState<{email: string, password: string} | null>(null)
+  const [newCredentials, setNewCredentials] = useState<{email: string, password: string, ucName: string} | null>(null)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     fetchData()
@@ -113,7 +114,8 @@ export default function SuperAdminDashboard() {
 
         if (profileError) throw profileError
 
-        setNewCredentials({ email, password })
+        setNewCredentials({ email, password, ucName: uc.name })
+        setCopied(false)
         
         // Update local state to reflect official exists
         setStats(prev => prev.map(s => s.uc.id === uc.id ? { ...s, hasOfficial: true } : s))
@@ -124,6 +126,23 @@ export default function SuperAdminDashboard() {
     } finally {
       setGeneratingFor(null)
     }
+  }
+
+  function showExistingCredentials(uc: UC) {
+    const safeName = uc.name.toLowerCase().replace(/[^a-z0-9]/g, '')
+    const email = `admin_${safeName}@humawaaz.pk`
+    const password = `Humawaaz2026_${safeName.substring(0,4)}!`
+    setNewCredentials({ email, password, ucName: uc.name })
+    setCopied(false)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function handleCopy() {
+    if (!newCredentials) return
+    const textToCopy = `UC: ${newCredentials.ucName}\nEmail: ${newCredentials.email}\nPassword: ${newCredentials.password}`
+    navigator.clipboard.writeText(textToCopy)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   if (loading) {
@@ -144,14 +163,14 @@ export default function SuperAdminDashboard() {
       </div>
 
       {newCredentials && (
-        <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-6 mb-8 relative overflow-hidden">
+        <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-6 mb-8 relative overflow-hidden flex items-start justify-between">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 bg-emerald-500/20 rounded-full flex items-center justify-center shrink-0">
               <Key className="w-6 h-6 text-emerald-400" />
             </div>
             <div>
-              <h3 className="text-emerald-400 font-bold text-lg mb-1">Official Account Created!</h3>
-              <p className="text-surface-300 text-sm mb-4">Please securely copy these credentials and provide them to the UC Chairman. They will not be shown again.</p>
+              <h3 className="text-emerald-400 font-bold text-lg mb-1">Credentials for {newCredentials.ucName}</h3>
+              <p className="text-surface-300 text-sm mb-4">Please securely copy these credentials and provide them to the UC Chairman.</p>
               
               <div className="space-y-2 bg-surface-900/50 p-4 rounded-xl inline-block border border-surface-700/50">
                 <div className="flex gap-4">
@@ -165,6 +184,13 @@ export default function SuperAdminDashboard() {
               </div>
             </div>
           </div>
+          <button 
+            onClick={handleCopy}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${copied ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-surface-800 text-surface-200 hover:bg-surface-700 border border-surface-600'}`}
+          >
+            {copied ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+            {copied ? 'Copied!' : 'Copy Details'}
+          </button>
         </div>
       )}
 
@@ -218,12 +244,21 @@ export default function SuperAdminDashboard() {
                       <span className="text-surface-500 text-sm">0</span>
                     )}
                   </td>
-                  <td className="p-4 text-center">
+                  <td className="p-4 text-center flex items-center justify-center gap-3">
                     {hasOfficial ? (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
-                        Active
-                      </span>
+                      <>
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                          Active
+                        </span>
+                        <button
+                          onClick={() => showExistingCredentials(uc)}
+                          className="p-2 rounded-lg bg-surface-800 text-surface-400 hover:text-brand-400 hover:bg-surface-700 transition-colors"
+                          title="View Credentials"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                      </>
                     ) : (
                       <button
                         onClick={() => generateCredentials(uc)}
