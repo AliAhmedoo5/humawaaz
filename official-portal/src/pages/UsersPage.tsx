@@ -2,19 +2,24 @@ import { useState, useEffect } from 'react'
 import { Search, Filter, Eye, UserX, CheckCircle, Clock } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
+import { useAuth } from '../context/AuthContext'
+
 export default function UsersPage() {
+  const { profile } = useAuth()
   const [users, setUsers] = useState<any[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
   const [loading, setLoading] = useState(true)
 
   const fetchUsers = async () => {
+    if (!profile?.uc_id) return
     try {
       setLoading(true)
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('role', 'citizen')
+        .eq('uc_id', profile.uc_id)
         .order('created_at', { ascending: false })
 
       if (error) {
@@ -30,20 +35,22 @@ export default function UsersPage() {
   }
 
   useEffect(() => {
-    fetchUsers()
+    if (profile?.uc_id) {
+      fetchUsers()
 
-    // Realtime subscription
-    const channel = supabase
-      .channel('public:profiles')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
-        fetchUsers()
-      })
-      .subscribe()
+      // Realtime subscription
+      const channel = supabase
+        .channel('public:profiles')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles', filter: `uc_id=eq.${profile.uc_id}` }, () => {
+          fetchUsers()
+        })
+        .subscribe()
 
-    return () => {
-      supabase.removeChannel(channel)
+      return () => {
+        supabase.removeChannel(channel)
+      }
     }
-  }, [])
+  }, [profile?.uc_id])
 
   const updateVerificationStatus = async (id: string, status: 'verified' | 'rejected') => {
     try {

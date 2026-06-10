@@ -2,7 +2,30 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, ActivityIndicator, Image } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import { MapPin, User, Phone, Clock, Building, CircleDot, UserCircle2 } from 'lucide-react-native';
+import { MapPin, User, Phone, Clock, Building, CircleDot, UserCircle2, Megaphone, Info, HandHeart, Trash2, Droplet, Wrench, TreePine, Lightbulb, HelpCircle } from 'lucide-react-native';
+
+interface Announcement {
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  created_at: string;
+}
+
+function timeAgo(dateString: string) {
+  const date = new Date(dateString);
+  const now = new Date();
+  const seconds = Math.round((now.getTime() - date.getTime()) / 1000);
+  if (seconds < 60) return 'just now';
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.round(hours / 24);
+  if (days < 30) return `${days}d ago`;
+  const months = Math.round(days / 30);
+  return `${months}mo ago`;
+}
 
 interface UCData {
   name: string;
@@ -29,6 +52,7 @@ export default function UCHubScreen() {
   const [ucData, setUcData] = useState<UCData | null>(null);
   const [settings, setSettings] = useState<UCSettings | null>(null);
   const [official, setOfficial] = useState<OfficialProfile | null>(null);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -64,6 +88,15 @@ export default function UCHubScreen() {
           .single();
         if (offError && offError.code !== 'PGRST116') throw offError;
         if (off) setOfficial(off);
+
+        // Fetch Announcements
+        const { data: ann, error: annError } = await supabase
+          .from('announcements')
+          .select('id, type, title, body, created_at')
+          .eq('uc_id', profile.uc_id)
+          .order('created_at', { ascending: false });
+        if (annError) console.error('Error fetching announcements:', annError);
+        else setAnnouncements(ann || []);
       } catch (err) {
         console.error('Error fetching UC Hub data:', err);
       } finally {
@@ -79,6 +112,11 @@ export default function UCHubScreen() {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'uc_settings', filter: `uc_id=eq.${profile.uc_id}` },
+        () => fetchData()
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'announcements', filter: `uc_id=eq.${profile.uc_id}` },
         () => fetchData()
       )
       .subscribe();
@@ -194,6 +232,112 @@ export default function UCHubScreen() {
             </View>
           </View>
         </View>
+
+        {/* Department Guide */}
+        <View className="mb-4 flex-row items-center justify-between px-2">
+          <View className="flex-row items-center">
+            <HelpCircle size={20} color="#f4f4f5" />
+            <Text className="text-surface-100 font-bold text-lg ml-2">Department Guide</Text>
+          </View>
+        </View>
+
+        <View className="bg-surface-800 rounded-3xl overflow-hidden mb-8 border border-surface-700 shadow-md">
+          {/* Sanitation */}
+          <View className="p-4 border-b border-surface-700 flex-row items-start">
+            <View className="w-10 h-10 bg-emerald-500/10 rounded-full items-center justify-center mr-3 shrink-0">
+              <Trash2 size={20} color="#34d399" />
+            </View>
+            <View className="flex-1">
+              <Text className="text-surface-100 font-bold text-base mb-1">Sanitation & Solid Waste</Text>
+              <Text className="text-surface-400 text-xs leading-relaxed">Garbage collection, overflowing dumpsters, street sweeping, and dead animal removal.</Text>
+            </View>
+          </View>
+
+          {/* Water */}
+          <View className="p-4 border-b border-surface-700 flex-row items-start">
+            <View className="w-10 h-10 bg-blue-500/10 rounded-full items-center justify-center mr-3 shrink-0">
+              <Droplet size={20} color="#60a5fa" />
+            </View>
+            <View className="flex-1">
+              <Text className="text-surface-100 font-bold text-base mb-1">Water Supply & Sewerage</Text>
+              <Text className="text-surface-400 text-xs leading-relaxed">Water shortages, contaminated supply, blocked gutters, and leaking pipelines.</Text>
+            </View>
+          </View>
+
+          {/* Infrastructure */}
+          <View className="p-4 border-b border-surface-700 flex-row items-start">
+            <View className="w-10 h-10 bg-amber-500/10 rounded-full items-center justify-center mr-3 shrink-0">
+              <Wrench size={20} color="#fbbf24" />
+            </View>
+            <View className="flex-1">
+              <Text className="text-surface-100 font-bold text-base mb-1">Infrastructure & Roads</Text>
+              <Text className="text-surface-400 text-xs leading-relaxed">Potholes, broken pavements, damaged bridges, and missing manhole covers.</Text>
+            </View>
+          </View>
+
+          {/* Parks */}
+          <View className="p-4 border-b border-surface-700 flex-row items-start">
+            <View className="w-10 h-10 bg-green-500/10 rounded-full items-center justify-center mr-3 shrink-0">
+              <TreePine size={20} color="#4ade80" />
+            </View>
+            <View className="flex-1">
+              <Text className="text-surface-100 font-bold text-base mb-1">Parks & Horticulture</Text>
+              <Text className="text-surface-400 text-xs leading-relaxed">Unmaintained parks, fallen trees, overgrown bushes, and damaged playground equipment.</Text>
+            </View>
+          </View>
+
+          {/* Street Lights */}
+          <View className="p-4 flex-row items-start">
+            <View className="w-10 h-10 bg-yellow-500/10 rounded-full items-center justify-center mr-3 shrink-0">
+              <Lightbulb size={20} color="#facc15" />
+            </View>
+            <View className="flex-1">
+              <Text className="text-surface-100 font-bold text-base mb-1">Street Lights</Text>
+              <Text className="text-surface-400 text-xs leading-relaxed">Broken or flickering street lights, exposed wiring, and dark alleyways.</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Notice Board */}
+        <View className="mb-4 mt-2 flex-row items-center justify-between px-2">
+          <View className="flex-row items-center">
+            <Megaphone size={20} color="#f4f4f5" />
+            <Text className="text-surface-100 font-bold text-lg ml-2">Notice Board</Text>
+          </View>
+        </View>
+
+        {announcements.length === 0 ? (
+          <View className="bg-surface-800 rounded-2xl p-6 items-center border border-surface-700 border-dashed mb-8">
+            <Megaphone size={32} color="#52525b" />
+            <Text className="text-surface-300 font-semibold mt-3">No active notices</Text>
+            <Text className="text-surface-500 text-sm text-center mt-1">There are no announcements from your Union Council at this time.</Text>
+          </View>
+        ) : (
+          <View className="mb-8">
+            {announcements.map((notice) => (
+              <View key={notice.id} className="bg-surface-800 rounded-2xl p-5 mb-4 border border-surface-700 shadow-sm">
+                <View className="flex-row justify-between items-start mb-3">
+                  <View className="flex-row items-center">
+                    {notice.type === 'announcement' ? (
+                      <View className="bg-brand-500/20 px-2 py-1 rounded flex-row items-center">
+                        <Info size={12} color="#4ade80" />
+                        <Text className="text-brand-400 text-[10px] uppercase font-bold tracking-wider ml-1">Announcement</Text>
+                      </View>
+                    ) : (
+                      <View className="bg-amber-500/20 px-2 py-1 rounded flex-row items-center">
+                        <HandHeart size={12} color="#fbbf24" />
+                        <Text className="text-amber-400 text-[10px] uppercase font-bold tracking-wider ml-1">Civic Request</Text>
+                      </View>
+                    )}
+                  </View>
+                  <Text className="text-surface-500 text-xs">{timeAgo(notice.created_at)}</Text>
+                </View>
+                <Text className="text-surface-100 font-bold text-lg mb-2">{notice.title}</Text>
+                <Text className="text-surface-300 text-sm leading-relaxed">{notice.body}</Text>
+              </View>
+            ))}
+          </View>
+        )}
 
       </View>
     </ScrollView>
