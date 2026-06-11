@@ -79,23 +79,10 @@ function AppRoutes() {
 }
 
 export default function App() {
-  const [isMobile, setIsMobile] = useState(false)
-
-  useEffect(() => {
-    const checkMobile = () => {
-      const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera
-      const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase())
-      setIsMobile(window.innerWidth < 1024 || isMobileDevice)
-    }
-    
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
-
-  if (isMobile) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-surface-900 px-4 text-center">
+  return (
+    <>
+      {/* Mobile Blocker - Visible only on small screens (< 768px) */}
+      <div className="md:hidden min-h-screen flex items-center justify-center bg-surface-900 px-4 text-center">
         <div>
           <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/20">
             <svg className="w-8 h-8 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -108,14 +95,15 @@ export default function App() {
           </p>
         </div>
       </div>
-    )
-  }
 
-  return (
-    <BrowserRouter>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
-    </BrowserRouter>
+      {/* Main Desktop App - Hidden on small screens, visible on md (768px) and up */}
+      <div className="hidden md:block">
+        <BrowserRouter>
+          <AuthProvider>
+            <AppRoutes />
+          </AuthProvider>
+        </BrowserRouter>
+      </div>
+    </>
   )
 }
