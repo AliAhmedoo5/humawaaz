@@ -121,7 +121,8 @@ export default function LoginPage() {
                 'Sign In'
               )}
             </button>
-          )}
+          </form>
+        )}
 
           <p className="mt-6 text-center text-xs text-surface-500">
             Access is restricted to admin-provisioned UC official accounts only.
