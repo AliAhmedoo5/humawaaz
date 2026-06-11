@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useState, useEffect, type FormEvent } from 'react'
 import { Megaphone } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useNavigate } from 'react-router-dom'
@@ -10,6 +10,14 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -46,9 +54,20 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Login Card */}
+        {/* Login Card or Mobile Blocker */}
         <div className="glass rounded-2xl p-8 glow-brand">
-          <form onSubmit={handleSubmit} className="space-y-5">
+          {isMobile ? (
+            <div className="text-center py-6">
+              <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/20">
+                <Megaphone className="w-8 h-8 text-red-400" />
+              </div>
+              <h2 className="text-xl font-bold text-surface-100 mb-2">Desktop Required</h2>
+              <p className="text-surface-400 text-sm">
+                The Official Portal contains complex dashboards and sensitive tools. Please open this link on a laptop or desktop computer to sign in.
+              </p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
               <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-4 py-3 rounded-lg">
                 {error}
@@ -102,7 +121,7 @@ export default function LoginPage() {
                 'Sign In'
               )}
             </button>
-          </form>
+          )}
 
           <p className="mt-6 text-center text-xs text-surface-500">
             Access is restricted to admin-provisioned UC official accounts only.
