@@ -81,8 +81,8 @@ function AppRoutes() {
 export default function App() {
   return (
     <>
-      {/* Mobile Blocker - Visible only on small screens (< 768px) */}
-      <div className="md:hidden min-h-screen flex items-center justify-center bg-surface-900 px-4 text-center">
+      {/* Mobile & Tablet Blocker - Visible only on screens < 1024px */}
+      <div className="lg:hidden min-h-screen flex items-center justify-center bg-surface-900 px-4 text-center">
         <div>
           <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/20">
             <svg className="w-8 h-8 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -91,13 +91,13 @@ export default function App() {
           </div>
           <h2 className="text-xl font-bold text-surface-100 mb-2">Desktop Required</h2>
           <p className="text-surface-400 text-sm">
-            Please open this link on a laptop or desktop computer.<br />Mobile access is disabled.
+            Please open this link on a laptop or desktop computer.<br />Mobile and tablet access is disabled.
           </p>
         </div>
       </div>
 
-      {/* Main Desktop App - Hidden on small screens, visible on md (768px) and up */}
-      <div className="hidden md:block">
+      {/* Main Desktop App - Hidden on tablets/phones, visible on lg (1024px) and up */}
+      <div className="hidden lg:block">
         <BrowserRouter>
           <AuthProvider>
             <AppRoutes />
